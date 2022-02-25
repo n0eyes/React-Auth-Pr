@@ -13,13 +13,18 @@ export const axiosLogin = axios.create({
   withCredentials: true,
 });
 
+export const axiosLogout = axios.create({
+  baseURL,
+  withCredentials: true,
+});
+
 export const axiosPrivate = axios.create({
   baseURL,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
 
-export const refresh = axios.create({
+export const axiosRefresh = axios.create({
   baseURL,
   withCredentials: true,
 });

@@ -1,17 +1,17 @@
-import { refresh } from "../api/axios";
+import { axiosRefresh } from "../api/axios";
 import useAuth from "./useAuth";
 
 function useRefreshToken() {
   const REFRESH_URL = "/refresh";
   const { setAuth } = useAuth();
 
-  async function getNewAccessToken() {
+  async function refresh() {
     try {
-      const { accessToken } = await refresh
+      const { accessToken, roles } = await axiosRefresh
         .get(REFRESH_URL)
         .then((response) => response.data);
 
-      setAuth((prev) => ({ ...prev, accessToken }));
+      setAuth((prev) => ({ ...prev, roles, accessToken }));
 
       return accessToken;
     } catch (error) {
@@ -19,7 +19,7 @@ function useRefreshToken() {
     }
   }
 
-  return getNewAccessToken;
+  return refresh;
 }
 
 export default useRefreshToken;

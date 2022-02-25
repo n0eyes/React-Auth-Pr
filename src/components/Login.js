@@ -5,7 +5,7 @@ import { axiosLogin } from "../api/axios";
 const LOGIN_URL = "/auth";
 
 function Login() {
-  const { setAuth } = useAuth();
+  const { setAuth, setPersist, persist } = useAuth();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,6 +18,8 @@ function Login() {
   const [pwd, setPwd] = useState("");
   const [errMsg, setErrMsg] = useState("");
 
+  const togglePersist = () => setPersist((prev) => !prev);
+
   useEffect(() => {
     userRef.current.focus();
   }, []);
@@ -25,6 +27,12 @@ function Login() {
   useEffect(() => {
     setErrMsg("");
   }, [user, pwd]);
+
+  useEffect(() => {
+    persist
+      ? localStorage.setItem("persist", true)
+      : localStorage.removeItem("persist");
+  }, [persist]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,6 +94,15 @@ function Login() {
           required
         />
         <button>Sign In</button>
+        <div>
+          <input
+            id="persist"
+            type="checkbox"
+            onChange={togglePersist}
+            checked={persist}
+          />
+          <label htmlFor="persist">Login Persist</label>
+        </div>
       </form>
       <p>
         <span className="line">

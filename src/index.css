@@ -77,10 +77,15 @@ textarea {
   border-radius: 0.5rem;
   outline: none;
 }
-
+input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
 label,
 button {
   margin-top: 1rem;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 button {

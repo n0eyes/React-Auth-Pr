@@ -1,6 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useContext } from "react";
 import AuthContext from "../context/AuthProvider";
+import { axiosLogout } from "../api/axios";
 
 const Home = () => {
   const { setAuth } = useContext(AuthContext);
@@ -8,6 +9,7 @@ const Home = () => {
 
   const logout = async () => {
     setAuth({});
+    await axiosLogout("./logout");
     navigate("/login");
   };
 
