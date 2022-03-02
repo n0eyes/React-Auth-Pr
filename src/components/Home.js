@@ -2,14 +2,16 @@ import { useNavigate, Link } from "react-router-dom";
 import { useContext } from "react";
 import AuthContext from "../context/AuthProvider";
 import { axiosLogout } from "../api/axios";
+import to from "await-to-js";
 
 const Home = () => {
-  const { setAuth } = useContext(AuthContext);
+  const { dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const logout = async () => {
-    setAuth({});
-    await axiosLogout("./logout");
+    dispatch({ type: "LOGOUT" });
+    const [error] = await to(axiosLogout("./logout"));
+    if (error) throw new Error(error);
     navigate("/login");
   };
 

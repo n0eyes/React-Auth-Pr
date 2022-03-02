@@ -4,7 +4,7 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
 
 function Users() {
-  const { auth, setAuth } = useAuth();
+  const { setAuth } = useAuth();
   const [users, setUsers] = useState();
   const axiosPrivate = useAxiosPrivate();
   const navigate = useNavigate();
@@ -21,7 +21,6 @@ function Users() {
         });
         isMounted && setUsers(response?.data);
       } catch (err) {
-        console.log("User error");
         console.error(err);
         setAuth({});
         navigate("/login", { state: { from: location }, replace: true });

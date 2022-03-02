@@ -2,10 +2,17 @@ import { useRef, useState, useEffect } from "react";
 import useAuth from "../hooks/useAuth";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { axiosLogin } from "../api/axios";
+import to from "await-to-js";
 const LOGIN_URL = "/auth";
 
 function Login() {
-  const { setAuth, setPersist, persist } = useAuth();
+  const {
+    togglePersist,
+    persist,
+    dispatch,
+    errMsg,
+    loginPromise: { loading },
+  } = useAuth();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,16 +23,13 @@ function Login() {
 
   const [user, setUser] = useState("");
   const [pwd, setPwd] = useState("");
-  const [errMsg, setErrMsg] = useState("");
-
-  const togglePersist = () => setPersist((prev) => !prev);
 
   useEffect(() => {
     userRef.current.focus();
   }, []);
 
   useEffect(() => {
-    setErrMsg("");
+    dispatch({ type: "CLEAR_ERROR_MSG" });
   }, [user, pwd]);
 
   useEffect(() => {
@@ -34,36 +38,50 @@ function Login() {
       : localStorage.removeItem("persist");
   }, [persist]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const clearInput = () => {
+    setUser("");
+    setPwd("");
+  };
 
-    try {
-      const response = await axiosLogin.post(
-        LOGIN_URL,
-        JSON.stringify({ user, pwd })
-      );
-
-      const accessToken = response?.data?.accessToken;
-      const roles = response?.data?.roles;
-      setAuth({ user, pwd, roles, accessToken });
-      setUser("");
-      setPwd("");
-      navigate(from, { replace: true });
-    } catch (err) {
-      if (!err?.response) {
-        setErrMsg("No Server Response");
-      } else if (err.response?.status === 400) {
-        setErrMsg("Missing Username or Password");
-      } else if (err.response?.status === 401) {
-        setErrMsg("Unauthorized");
-      } else {
-        setErrMsg("Login Failed");
+  const handleError = (errorRes) => {
+    if (!errorRes) {
+      return "No Server Response";
+    }
+    switch (errorRes.status) {
+      case 400: {
+        return "Missing Username or Password";
       }
-      errRef.current.focus();
+      case 401: {
+        return "Unauthorized";
+      }
+      default:
+        return "Login Failed";
     }
   };
 
-  return (
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    dispatch({ type: "LOGIN_REQUEST" });
+    const [error, response] = await to(
+      axiosLogin.post(LOGIN_URL, JSON.stringify({ user, pwd }))
+    );
+
+    if (error) {
+      dispatch({ type: "LOGIN_FAILED", payload: handleError(error.response) });
+    } else {
+      dispatch({
+        type: "LOGIN_SUCCESS",
+        payload: { res: response.data, user, pwd },
+      });
+      clearInput();
+      navigate(from, { replace: true });
+    }
+  };
+
+  return loading ? (
+    <p>Login Loading...</p>
+  ) : (
     <section>
       <p
         ref={errRef}

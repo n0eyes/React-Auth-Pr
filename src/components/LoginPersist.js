@@ -1,27 +1,24 @@
+import to from "await-to-js";
 import React, { useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import { useState } from "react/cjs/react.development";
 import useAuth from "../hooks/useAuth";
 import useRefreshToken from "../hooks/useRefreshToken";
 
 function LoginPersist() {
-  const [isLoading, setIsLoading] = useState(true);
   const refresh = useRefreshToken();
-  const { persist } = useAuth();
+  const {
+    persist,
+    auth: { accessToken },
+    refreshPromise: { status },
+  } = useAuth();
 
   useEffect(() => {
     (async () => {
-      try {
-        persist && (await refresh());
-      } catch (error) {
-        throw new Error(error);
-      } finally {
-        setIsLoading(false);
-      }
+      persist && !accessToken && (await to(refresh()));
     })();
-  }, []);
+  }, [persist]);
 
-  return isLoading ? <p>Loading...</p> : <Outlet />;
+  return status === "Pending" && !accessToken ? <p>Loading...</p> : <Outlet />;
 }
 
 export default LoginPersist;
